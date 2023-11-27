@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace midterm_project
@@ -58,6 +59,7 @@ namespace midterm_project
                     {
                         TransactionHistory transactionHistory = new TransactionHistory();
                         transactionHistory.RecordTransaction(selectedProduct, quantity, totalPrice);
+                        UpdateInventoryAfterPurchase(itemId, quantity); // Update inventory after purchase
                         Console.WriteLine("Purchase successful!");
                     }
                     else
@@ -68,12 +70,51 @@ namespace midterm_project
                 catch (Exception ex)
                 {
                     Console.WriteLine($"An error occurred: {ex.Message}");
-                }
+                }            
             }
             else if (user_Input == "E")
             {
                 Console.WriteLine("Bye");
                 Console.ReadKey();
+            }
+        }
+
+        private void UpdateInventoryAfterPurchase(int itemId, int purchasedQuantity)
+        {
+            try
+            {
+                string filePath = "inventory.csv";
+                string[] lines = File.ReadAllLines(filePath);
+
+                List<string> updatedLines = new List<string>();
+
+                foreach (string line in lines)
+                {
+                    string[] fields = line.Split(',');
+
+                    if (int.TryParse(fields[0], out int currentItemId) && currentItemId == itemId)
+                    {
+                        int currentQuantity;
+                        if (int.TryParse(fields[3], out currentQuantity))
+                        {
+                            // Decrease the quantity by the purchased quantity
+                            currentQuantity -= purchasedQuantity;
+                            fields[3] = currentQuantity.ToString();
+                        }
+                    }
+
+                    // Add the modified or unmodified line to the updated list
+                    updatedLines.Add(string.Join(",", fields));
+                }
+
+                // Write the updated content back to the file
+                File.WriteAllLines(filePath, updatedLines);
+
+                Console.WriteLine("Inventory updated after purchase!");
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine($"An error occurred while updating the inventory: {e.Message}");
             }
         }
         // Helper method to retrieve product name by ItemID from the inventory
