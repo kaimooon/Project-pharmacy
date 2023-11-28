@@ -78,7 +78,6 @@ namespace midterm_project
                 Console.ReadKey();
             }
         }
-
         private void UpdateInventoryAfterPurchase(int itemId, int purchasedQuantity)
         {
             try
