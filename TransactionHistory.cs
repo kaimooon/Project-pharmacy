@@ -60,5 +60,68 @@ namespace midterm_project
                 return 0; // Return 0 if an error occurs while reading the file
             }
         }
+        public void SearchOrderByID(int orderId)
+        {
+            try
+            {
+                string[] transactionLines = File.ReadAllLines(TransactionFilePath);
+
+                bool orderFound = false;
+
+                foreach (string line in transactionLines)
+                {
+                    string[] fields = line.Split(',');
+
+                    if (fields.Length >= 5 && int.TryParse(fields[0], out int currentOrderId) && currentOrderId == orderId)
+                    {
+                        Console.WriteLine($"Order Details: {line}");
+                        orderFound = true;
+                        break;
+                    }
+                }
+
+                if (!orderFound)
+                {
+                    Console.WriteLine($"Order ID {orderId} not found in the transaction history.");
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("Transaction history file not found.");
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine($"An error occurred while reading the transaction history: {e.Message}");
+            }
+        }
+
+        public void ViewAllTransactions()
+        {
+            try
+            {
+                string[] transactionLines = File.ReadAllLines(TransactionFilePath);
+
+                if (transactionLines.Length > 0)
+                {
+                    Console.WriteLine("Transaction History:");
+                    foreach (string line in transactionLines)
+                    {
+                        Console.WriteLine(line);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Transaction history is empty.");
+                }
+            }
+            catch (FileNotFoundException)
+            {
+                Console.WriteLine("Transaction history file not found.");
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine($"An error occurred while reading the transaction history: {e.Message}");
+            }
+        }
     }
 }
