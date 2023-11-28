@@ -77,7 +77,7 @@ namespace midterm_project
 
             else if (user_Input == "S")
             {
-                Console.WriteLine("Enter the partial name of the product: ");
+                Console.WriteLine("Type in the name of the product: ");
                 string partialName = Console.ReadLine();
 
                 SearchEngine searchEngine = new SearchEngine();
