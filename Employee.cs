@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace midterm_project
 {
@@ -14,17 +15,14 @@ namespace midterm_project
             Console.WriteLine();
             DisplayLowStockWarning();
             Console.WriteLine();
+            Console.WriteLine();
             Console.WriteLine("Press 'V' if you want to view the inventory.");
             Console.WriteLine();
             Console.WriteLine("Press 'A' if you want to add item or stock in the inventory.");
             Console.WriteLine();
             Console.WriteLine("Press 'R' if you want to remove stock in the inventory.");
-            Console.WriteLine();
-            Console.WriteLine("Press 'U' if you want to update the price of a product in the inventory");
-            Console.WriteLine();
+            Console.WriteLine();      
             Console.WriteLine("Press 'T' if you want to view the transaction history.");
-            Console.WriteLine();
-            Console.WriteLine("Press 'S' if you want to search in the transaction history.");
             Console.WriteLine();
             Console.WriteLine("Press 'E' to exit.");
             string user_Input = Console.ReadLine().ToUpper();
@@ -48,25 +46,10 @@ namespace midterm_project
             else if (user_Input == "T")
             {
                 TransactionHistory history = new TransactionHistory();
-                history.ViewAllTransactions();
-            }
-
-            else if (user_Input == "S")
-            {
-                Console.Write("Enter the Order ID to search: ");
-                if (int.TryParse(Console.ReadLine(), out int orderId))
-                {
-                    TransactionHistory history = new TransactionHistory();
-                    history.SearchOrderByID(orderId);
-                }
-                else
-                {
-                    Console.WriteLine("Invalid input. Please enter a valid Order ID.");
-                }
             }
 
             else if (user_Input == "E")
-            {           
+            {
                 return;
             }
 
@@ -161,11 +144,11 @@ namespace midterm_project
                     }
 
                     string productName = newProductColumns[0];
-
-                    // Extract the numeric part of the price value (remove non-numeric characters)
                     string priceString = newProductColumns[1].TrimStart('P', 'p');
 
-                    if (double.TryParse(priceString, out double price) && int.TryParse(newProductColumns[2], out int stockQuantity))
+                    double price = ExtractNumericValue(priceString);
+
+                    if (double.TryParse(priceString, out double newPrice) && int.TryParse(newProductColumns[2], out int stockQuantity))
                     {
                         bool productFound = false;
 
@@ -175,6 +158,8 @@ namespace midterm_project
 
                             if (columns.Length >= 4 && columns[1].Trim() == productName)
                             {
+                                // Update the price with the new price from the second CSV file
+                                columns[2] = $"P{newPrice}"; // Assuming price is at index 2
                                 int currentStock = int.Parse(columns[3]); // Assuming quantity is at index 3
                                 columns[3] = (currentStock + stockQuantity).ToString(); // Assuming quantity is at index 3
                                 updatedMainInventory[i] = string.Join(",", columns);
@@ -186,7 +171,7 @@ namespace midterm_project
                         if (!productFound)
                         {
                             // If the product doesn't exist, add a new row for the new product
-                            string newProductLine = $"{GenerateProductId(updatedMainInventory)},{productName},0,{stockQuantity},{price}"; // Assuming price is at index 4
+                            string newProductLine = $"{GenerateProductId(updatedMainInventory)},{productName},{newPrice},{stockQuantity}"; // Assuming price is at index 2 and quantity at index 3
                             updatedMainInventory.Add(newProductLine);
                         }
                     }
