@@ -12,7 +12,6 @@ namespace midterm_project
         public Employee()
         {
             Console.WriteLine("Welcome Employee!");
-            Console.WriteLine();
             DisplayLowStockWarning();
             Console.WriteLine();
             Console.WriteLine();
@@ -128,7 +127,7 @@ namespace midterm_project
                 string mainInventoryPath = "inventory.csv";
                 string newStockPath = "newstock.csv";
 
-                string[] mainInventoryLines = File.ReadAllLines(mainInventoryPath).Skip(1).ToArray(); // Skip the header line
+                string[] mainInventoryLines = File.ReadAllLines(mainInventoryPath); // Read all lines, including the header line
                 string[] newStockLines = File.ReadAllLines(newStockPath).Skip(1).ToArray(); // Skip the header line
 
                 List<string> updatedMainInventory = new List<string>(mainInventoryLines);
@@ -144,11 +143,9 @@ namespace midterm_project
                     }
 
                     string productName = newProductColumns[0];
-                    string priceString = newProductColumns[1].TrimStart('P', 'p');
+                    string priceString = newProductColumns[1].Trim(); // Trim spaces
 
-                    double price = ExtractNumericValue(priceString);
-
-                    if (double.TryParse(priceString, out double newPrice) && int.TryParse(newProductColumns[2], out int stockQuantity))
+                    if (int.TryParse(priceString.Substring(1), out int price) && int.TryParse(newProductColumns[2], out int stockQuantity))
                     {
                         bool productFound = false;
 
@@ -158,20 +155,24 @@ namespace midterm_project
 
                             if (columns.Length >= 4 && columns[1].Trim() == productName)
                             {
-                                // Update the price with the new price from the second CSV file
-                                columns[2] = $"P{newPrice}"; // Assuming price is at index 2
-                                int currentStock = int.Parse(columns[3]); // Assuming quantity is at index 3
-                                columns[3] = (currentStock + stockQuantity).ToString(); // Assuming quantity is at index 3
-                                updatedMainInventory[i] = string.Join(",", columns);
-                                productFound = true;
-                                break;
+                                // Update the existing product's stock quantity
+                                int currentStock;
+                                if (int.TryParse(columns[3], out currentStock))
+                                {
+                                    currentStock += stockQuantity;
+                                    columns[3] = currentStock.ToString();
+                                    updatedMainInventory[i] = string.Join(",", columns);
+                                    productFound = true;
+                                    break;
+                                }
                             }
                         }
 
                         if (!productFound)
                         {
-                            // If the product doesn't exist, add a new row for the new product
-                            string newProductLine = $"{GenerateProductId(updatedMainInventory)},{productName},{newPrice},{stockQuantity}"; // Assuming price is at index 2 and quantity at index 3
+                            // Construct the new product line with a prefixed 'P' for the price without decimal points
+                            string formattedPrice = $"P{price.ToString()}"; // Assuming price format: P + numeric value
+                            string newProductLine = $"{GenerateProductId(updatedMainInventory)},{productName},{formattedPrice},{stockQuantity}";
                             updatedMainInventory.Add(newProductLine);
                         }
                     }
@@ -193,12 +194,39 @@ namespace midterm_project
             }
         }
 
-        private int GenerateProductId(IEnumerable<string> lines)
+        private string GenerateProductId(IEnumerable<string> lines)
         {
-            // Replace this with your logic to generate a new product ID
-            // For simplicity, let's assume the product ID is one more than the maximum existing ID
-            int maxId = lines.Select(line => int.Parse(line.Split(',')[0])).DefaultIfEmpty(0).Max();
-            return maxId + 1;
+            try
+            {
+                string inventoryFilePath = "inventory.csv";
+
+                if (!File.Exists(inventoryFilePath))
+                {
+                    return "1"; // If inventory file doesn't exist, start with product ID 1
+                }
+
+                string[] inventoryLines = File.ReadAllLines(inventoryFilePath);
+
+                if (inventoryLines.Length == 0)
+                {
+                    return "1"; // If inventory file is empty, start with product ID 1
+                }
+
+                // Extracting the last product ID from the inventory
+                string lastProductId = inventoryLines.Last().Split(',')[0];
+                if (int.TryParse(lastProductId, out int lastId))
+                {
+                    return (lastId + 1).ToString(); // Return next available product ID
+                }
+
+                // Return a default value if the last product ID couldn't be parsed
+                return "1";
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine($"An error occurred while reading the inventory file: {e.Message}");
+                return "1"; // Return a default value if an error occurs
+            }
         }
         private double ExtractNumericValue(string input)
         {
@@ -227,25 +255,7 @@ namespace midterm_project
             }
         }
 
-        private string GenerateProductId(string[] inventoryLines)
-        {
-            // You can implement your own logic to generate a unique product ID
-            // For simplicity, this example assumes that product IDs are numeric and increments from the last product ID in the inventory
-
-            if (inventoryLines.Length == 0)
-            {
-                return "1"; // Start with product ID 1 if the inventory is empty
-            }
-
-            string lastProductId = inventoryLines.Last().Split(',')[0];
-            if (int.TryParse(lastProductId, out int lastId))
-            {
-                return (lastId + 1).ToString();
-            }
-
-            // If parsing fails, return a default value
-            return "1";
-        }
+        
 
         private void remove()
         {
