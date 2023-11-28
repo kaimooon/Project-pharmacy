@@ -18,6 +18,7 @@ namespace midterm_project
             Console.WriteLine();
             Console.WriteLine("Press 'E' to exit.");
             string user_Input = Console.ReadLine().ToUpper();
+            Console.Clear();
 
             if (user_Input == "V")
             {
