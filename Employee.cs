@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace midterm_project
 {
@@ -12,6 +11,8 @@ namespace midterm_project
         public Employee()
         {
             Console.WriteLine("Welcome Employee!");
+            Console.WriteLine();
+            DisplayLowStockWarning();
             Console.WriteLine();
             Console.WriteLine("Press 'V' if you want to view the inventory.");
             Console.WriteLine();
@@ -22,6 +23,8 @@ namespace midterm_project
             Console.WriteLine("Press 'U' if you want to update the price of a product in the inventory");
             Console.WriteLine();
             Console.WriteLine("Press 'T' if you want to view the transaction history.");
+            Console.WriteLine();
+            Console.WriteLine("Press 'S' if you want to search in the transaction history.");
             Console.WriteLine();
             Console.WriteLine("Press 'E' to exit.");
             string user_Input = Console.ReadLine().ToUpper();
@@ -45,10 +48,25 @@ namespace midterm_project
             else if (user_Input == "T")
             {
                 TransactionHistory history = new TransactionHistory();
+                history.ViewAllTransactions();
+            }
+
+            else if (user_Input == "S")
+            {
+                Console.Write("Enter the Order ID to search: ");
+                if (int.TryParse(Console.ReadLine(), out int orderId))
+                {
+                    TransactionHistory history = new TransactionHistory();
+                    history.SearchOrderByID(orderId);
+                }
+                else
+                {
+                    Console.WriteLine("Invalid input. Please enter a valid Order ID.");
+                }
             }
 
             else if (user_Input == "E")
-            {
+            {           
                 return;
             }
 
@@ -93,6 +111,30 @@ namespace midterm_project
             {
                 Console.WriteLine($"Failed to parse double value from column '{columnName}' with input: {input}");
                 return 0.0; // Or any default value that makes sense in your context
+            }
+        }
+
+        private void DisplayLowStockWarning()
+        {
+            try
+            {
+                string filePath = "inventory.csv";
+                string[] lines = File.ReadAllLines(filePath);
+
+                foreach (string line in lines)
+                {
+                    string[] fields = line.Split(',');
+
+                    if (int.TryParse(fields[3], out int quantity) && quantity <= 5)
+                    {
+                        string itemName = fields[1];
+                        Console.WriteLine($"WARNING: LOW STOCK FOR {itemName.ToUpper()}!");
+                    }
+                }
+            }
+            catch (IOException e)
+            {
+                Console.WriteLine($"An error occurred while reading the file: {e.Message}");
             }
         }
 
