@@ -132,6 +132,12 @@ namespace midterm_project
 
                 List<string> updatedMainInventory = new List<string>(mainInventoryLines);
 
+                int lastProductId = updatedMainInventory
+                    .Skip(1) // Skip the header line
+                    .Select(line => int.Parse(line.Split(',')[0]))
+                    .DefaultIfEmpty(0)
+                    .Max(); // Get the maximum product ID
+
                 foreach (string newProduct in newStockLines)
                 {
                     string[] newProductColumns = newProduct.Split(',');
@@ -170,9 +176,10 @@ namespace midterm_project
 
                         if (!productFound)
                         {
-                            // Construct the new product line with a prefixed 'P' for the price without decimal points
+                            // Increment the last product ID and use it for the new product
+                            lastProductId++;
                             string formattedPrice = $"P{price.ToString()}"; // Assuming price format: P + numeric value
-                            string newProductLine = $"{GenerateProductId(updatedMainInventory)},{productName},{formattedPrice},{stockQuantity}";
+                            string newProductLine = $"{lastProductId},{productName},{formattedPrice},{stockQuantity}";
                             updatedMainInventory.Add(newProductLine);
                         }
                     }
@@ -194,39 +201,12 @@ namespace midterm_project
             }
         }
 
-        private string GenerateProductId(IEnumerable<string> lines)
+        private int GenerateProductId(IEnumerable<string> lines)
         {
-            try
-            {
-                string inventoryFilePath = "inventory.csv";
-
-                if (!File.Exists(inventoryFilePath))
-                {
-                    return "1"; // If inventory file doesn't exist, start with product ID 1
-                }
-
-                string[] inventoryLines = File.ReadAllLines(inventoryFilePath);
-
-                if (inventoryLines.Length == 0)
-                {
-                    return "1"; // If inventory file is empty, start with product ID 1
-                }
-
-                // Extracting the last product ID from the inventory
-                string lastProductId = inventoryLines.Last().Split(',')[0];
-                if (int.TryParse(lastProductId, out int lastId))
-                {
-                    return (lastId + 1).ToString(); // Return next available product ID
-                }
-
-                // Return a default value if the last product ID couldn't be parsed
-                return "1";
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the inventory file: {e.Message}");
-                return "1"; // Return a default value if an error occurs
-            }
+            // Replace this with your logic to generate a new product ID
+            // For simplicity, let's assume the product ID is one more than the maximum existing ID
+            int maxId = lines.Select(line => int.Parse(line.Split(',')[0])).DefaultIfEmpty(0).Max();
+            return maxId + 1;
         }
         private double ExtractNumericValue(string input)
         {
@@ -255,7 +235,25 @@ namespace midterm_project
             }
         }
 
-        
+        private string GenerateProductId(string[] inventoryLines)
+        {
+            // You can implement your own logic to generate a unique product ID
+            // For simplicity, this example assumes that product IDs are numeric and increments from the last product ID in the inventory
+
+            if (inventoryLines.Length == 0)
+            {
+                return "1"; // Start with product ID 1 if the inventory is empty
+            }
+
+            string lastProductId = inventoryLines.Last().Split(',')[0];
+            if (int.TryParse(lastProductId, out int lastId))
+            {
+                return (lastId + 1).ToString();
+            }
+
+            // If parsing fails, return a default value
+            return "1";
+        }
 
         private void remove()
         {
