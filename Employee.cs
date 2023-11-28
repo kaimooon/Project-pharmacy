@@ -22,6 +22,8 @@ namespace midterm_project
             Console.WriteLine();      
             Console.WriteLine("Press 'T' if you want to view the transaction history.");
             Console.WriteLine();
+            Console.WriteLine("Press 'S' if you want to search for an item in the inventory.");
+            Console.WriteLine();
             Console.WriteLine("Press 'E' to exit.");
             string user_Input = Console.ReadLine().ToUpper();
             Console.Clear();
@@ -45,6 +47,15 @@ namespace midterm_project
             {            
                 TransactionHistory history = new TransactionHistory();
                 history.ViewAllTransactions();
+            }
+
+            else if (user_Input == "S")
+            {
+                Console.WriteLine("Enter the partial name of the product: ");
+                string partialName = Console.ReadLine();
+
+                SearchEngine searchEngine = new SearchEngine();
+                searchEngine.SearchProductInInventory(partialName);
             }
 
             else if (user_Input == "E")
