@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace midterm_project
 {
@@ -43,8 +42,9 @@ namespace midterm_project
             }
 
             else if (user_Input == "T")
-            {
+            {            
                 TransactionHistory history = new TransactionHistory();
+                history.ViewAllTransactions();
             }
 
             else if (user_Input == "E")
