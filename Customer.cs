@@ -14,6 +14,8 @@ namespace midterm_project
             Console.WriteLine();
             Console.WriteLine("Press 'B' to buy something from the store.");
             Console.WriteLine();
+            Console.WriteLine("Press 'S' if you want to search for an item in the inventory.");
+            Console.WriteLine();
             Console.WriteLine("Press 'E' to exit.");
             string user_Input = Console.ReadLine().ToUpper();
 
@@ -72,12 +74,23 @@ namespace midterm_project
                     Console.WriteLine($"An error occurred: {ex.Message}");
                 }            
             }
+
+            else if (user_Input == "S")
+            {
+                Console.WriteLine("Enter the partial name of the product: ");
+                string partialName = Console.ReadLine();
+
+                SearchEngine searchEngine = new SearchEngine();
+                searchEngine.SearchProductInInventory(partialName);
+            }
+
             else if (user_Input == "E")
             {
                 Console.WriteLine("Bye");
                 Console.ReadKey();
             }
         }
+
         private void UpdateInventoryAfterPurchase(int itemId, int purchasedQuantity)
         {
             try
