@@ -29,53 +29,45 @@ namespace midterm_project
             {
                 Console.WriteLine("Welcome Customer");
 
-                try
+                Inventory inventory = new Inventory();
+                inventory.view(); // Show available items
+
+                Console.Write("Enter the ItemID you want to purchase: ");
+                int itemId;
+                while (!int.TryParse(Console.ReadLine(), out itemId))
                 {
-                    Inventory inventory = new Inventory();
-                    inventory.view(); // Show available items
-
-                    Console.Write("Enter the ItemID you want to purchase: ");
-                    int itemId;
-                    while (!int.TryParse(Console.ReadLine(), out itemId))
-                    {
-                        Console.WriteLine("Invalid ItemID. Please enter a valid ItemID: ");
-                    }
-
-                    Console.Write("Enter the quantity you want to purchase: ");
-                    int quantity;
-                    while (!int.TryParse(Console.ReadLine(), out quantity) || quantity <= 0)
-                    {
-                        Console.WriteLine("Invalid quantity. Please enter a valid quantity: ");
-                    }
-
-                    string selectedProduct = GetProductNameById(itemId); // Retrieve product name from ItemID
-                    double totalPrice = CalculateTotalPrice(selectedProduct, quantity); // Calculate total price
-
-                    Console.WriteLine($"Selected Product: {selectedProduct}");
-                    Console.WriteLine($"Quantity: {quantity}");
-                    Console.WriteLine($"Total Price: {totalPrice}");
-
-                    Console.Write("Confirm purchase? (Y/N): ");
-                    string confirmation = Console.ReadLine()?.ToUpper();
-
-                    if (confirmation == "Y")
-                    {
-                        TransactionHistory transactionHistory = new TransactionHistory();
-                        transactionHistory.RecordTransaction(selectedProduct, quantity, totalPrice);
-                        UpdateInventoryAfterPurchase(itemId, quantity); // Update inventory after purchase
-                        Console.WriteLine("Purchase successful!");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Purchase canceled.");
-                    }
+                    Console.WriteLine("Invalid ItemID. Please enter a valid ItemID: ");
                 }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"An error occurred: {ex.Message}");
-                }            
-            }
 
+                Console.Write("Enter the quantity you want to purchase: ");
+                int quantity;
+                while (!int.TryParse(Console.ReadLine(), out quantity) || quantity <= 0)
+                {
+                    Console.WriteLine("Invalid quantity. Please enter a valid quantity: ");
+                }
+
+                string selectedProduct = GetProductNameById(itemId); // Retrieve product name from ItemID
+                double totalPrice = CalculateTotalPrice(selectedProduct, quantity); // Calculate total price
+
+                Console.WriteLine($"Selected Product: {selectedProduct}");
+                Console.WriteLine($"Quantity: {quantity}");
+                Console.WriteLine($"Total Price: {totalPrice}");
+
+                Console.Write("Confirm purchase? (Y/N): ");
+                string confirmation = Console.ReadLine()?.ToUpper();
+
+                if (confirmation == "Y")
+                {
+                    TransactionHistory transactionHistory = new TransactionHistory();
+                    transactionHistory.RecordTransaction(selectedProduct, quantity, totalPrice);
+                    UpdateInventoryAfterPurchase(itemId, quantity); // Update inventory after purchase
+                    Console.WriteLine("Purchase successful!");
+                }
+                else
+                {
+                    Console.WriteLine("Purchase canceled.");
+                }
+            }
             else if (user_Input == "S")
             {
                 Console.WriteLine("Type in the name of the product: ");
@@ -84,7 +76,6 @@ namespace midterm_project
                 SearchEngine searchEngine = new SearchEngine();
                 searchEngine.SearchProductInInventory(partialName);
             }
-
             else if (user_Input == "E")
             {
                 Console.WriteLine("Bye");
@@ -94,94 +85,84 @@ namespace midterm_project
 
         private void UpdateInventoryAfterPurchase(int itemId, int purchasedQuantity)
         {
-            try
+            string filePath = "inventory.csv";
+            string[] lines = File.ReadAllLines(filePath);
+
+            List<string> updatedLines = new List<string>();
+
+            foreach (string line in lines)
             {
-                string filePath = "inventory.csv";
-                string[] lines = File.ReadAllLines(filePath);
+                string[] fields = line.Split(',');
 
-                List<string> updatedLines = new List<string>();
-
-                foreach (string line in lines)
+                if (int.TryParse(fields[0], out int currentItemId) && currentItemId == itemId)
                 {
-                    string[] fields = line.Split(',');
-
-                    if (int.TryParse(fields[0], out int currentItemId) && currentItemId == itemId)
+                    int currentQuantity;
+                    if (int.TryParse(fields[3], out currentQuantity))
                     {
-                        int currentQuantity;
-                        if (int.TryParse(fields[3], out currentQuantity))
-                        {
-                            // Decrease the quantity by the purchased quantity
-                            currentQuantity -= purchasedQuantity;
-                            fields[3] = currentQuantity.ToString();
-                        }
+                        // Decrease the quantity by the purchased quantity
+                        currentQuantity -= purchasedQuantity;
+                        fields[3] = currentQuantity.ToString();
                     }
-
-                    // Add the modified or unmodified line to the updated list
-                    updatedLines.Add(string.Join(",", fields));
                 }
 
-                // Write the updated content back to the file
-                File.WriteAllLines(filePath, updatedLines);
+                // Add the modified or unmodified line to the updated list
+                updatedLines.Add(string.Join(",", fields));
+            }
 
-                Console.WriteLine("Inventory updated after purchase!");
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while updating the inventory: {e.Message}");
-            }
+            // Write the updated content back to the file
+            File.WriteAllLines(filePath, updatedLines);
+
+            Console.WriteLine("Inventory updated after purchase!");
         }
-        // Helper method to retrieve product name by ItemID from the inventory
+
         private string GetProductNameById(int itemId)
         {
-            try
-            {
-                string filePath = "inventory.csv";
-                string[] lines = File.ReadAllLines(filePath);
+            string filePath = "inventory.csv";
+            string[] lines = File.ReadAllLines(filePath);
 
-                foreach (string line in lines)
+            foreach (string line in lines)
+            {
+                string[] fields = line.Split(',');
+
+                if (int.TryParse(fields[0], out int currentItemId) && currentItemId == itemId)
                 {
-                    string[] fields = line.Split(',');
-
-                    if (int.TryParse(fields[0], out int currentItemId) && currentItemId == itemId)
-                    {
-                        return fields[1]; // Return product name if ItemID matches
-                    }
+                    return fields[1]; // Return product name if ItemID matches
                 }
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the file: {e.Message}");
             }
 
             return string.Empty; // Return an empty string if ItemID is not found
         }
 
-        // Helper method to calculate total price
         private double CalculateTotalPrice(string productName, int quantity)
         {
-            try
+            string filePath = "inventory.csv";
+            string[] lines = File.ReadAllLines(filePath);
+
+            foreach (string line in lines)
             {
-                string filePath = "inventory.csv";
-                string[] lines = File.ReadAllLines(filePath);
+                string[] fields = line.Split(',');
 
-                foreach (string line in lines)
+                if (fields[1] == productName)
                 {
-                    string[] fields = line.Split(',');
+                    // Extracting the numeric part from the price string (e.g., 'P10' -> '10')
+                    double price = 0.0;
+                    bool isNumericPart = false;
 
-                    if (fields[1] == productName)
+                    foreach (char character in fields[2])
                     {
-                        // Extracting the numeric part from the price string (e.g., 'P10' -> '10')
-                        string priceString = fields[2].Substring(1); // Assuming the price format is always 'P' followed by the numeric value
-                        if (double.TryParse(priceString, out double price))
+                        if (char.IsDigit(character) || character == '.')
                         {
-                            return price * quantity; // Calculate total price
+                            isNumericPart = true;
+                            price = price * 10 + (character - '0');
+                        }
+                        else if (isNumericPart)
+                        {
+                            break; // Stop when non-numeric characters appear after the numeric part
                         }
                     }
+
+                    return price * quantity; // Calculate total price
                 }
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the file: {e.Message}");
             }
 
             return 0.0; // Return 0.0 if the calculation fails
