@@ -10,13 +10,13 @@ namespace midterm_project
 
         public void RecordTransaction(string productName, int quantity, double totalPrice)
         {
+            int orderId = GenerateOrderId();
+            string timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+
+            string transactionRecord = $"{orderId},{timeStamp},{productName},{quantity},{totalPrice}";
+
             try
             {
-                int orderId = GenerateOrderId();
-                string timeStamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-                string transactionRecord = $"{orderId},{timeStamp},{productName},{quantity},{totalPrice}";
-
                 using (StreamWriter writer = new StreamWriter(TransactionFilePath, true))
                 {
                     writer.WriteLine(transactionRecord);
@@ -32,95 +32,60 @@ namespace midterm_project
 
         private int GenerateOrderId()
         {
-            // Generating a unique order ID - here, assuming the order ID is one more than the maximum existing ID in the transaction history
-            try
-            {
-                string[] transactionLines = File.ReadAllLines(TransactionFilePath);
+            string[] transactionLines = File.ReadAllLines(TransactionFilePath);
 
-                if (transactionLines.Length == 0)
-                {
-                    return 1; // Start with order ID 1 if transaction history is empty
-                }
-
-                int maxOrderId = transactionLines
-                    .Select(line => int.Parse(line.Split(',')[0]))
-                    .DefaultIfEmpty(0)
-                    .Max();
-
-                return maxOrderId + 1;
-            }
-            catch (FileNotFoundException)
+            if (transactionLines.Length == 0)
             {
-                // If the file doesn't exist, return 1 as the starting order ID
-                return 1;
+                return 1; // Start with order ID 1 if transaction history is empty
             }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the transaction history: {e.Message}");
-                return 0; // Return 0 if an error occurs while reading the file
-            }
+
+            int maxOrderId = transactionLines
+                .Select(line => int.Parse(line.Split(',')[0]))
+                .DefaultIfEmpty(0)
+                .Max();
+
+            return maxOrderId + 1;
         }
+
         public void SearchOrderByID(int orderId)
         {
-            try
+            string[] transactionLines = File.ReadAllLines(TransactionFilePath);
+
+            bool orderFound = false;
+
+            foreach (string line in transactionLines)
             {
-                string[] transactionLines = File.ReadAllLines(TransactionFilePath);
+                string[] fields = line.Split(',');
 
-                bool orderFound = false;
-
-                foreach (string line in transactionLines)
+                if (fields.Length >= 5 && int.TryParse(fields[0], out int currentOrderId) && currentOrderId == orderId)
                 {
-                    string[] fields = line.Split(',');
-
-                    if (fields.Length >= 5 && int.TryParse(fields[0], out int currentOrderId) && currentOrderId == orderId)
-                    {
-                        Console.WriteLine($"Order Details: {line}");
-                        orderFound = true;
-                        break;
-                    }
-                }
-
-                if (!orderFound)
-                {
-                    Console.WriteLine($"Order ID {orderId} not found in the transaction history.");
+                    Console.WriteLine($"Order Details: {line}");
+                    orderFound = true;
+                    break;
                 }
             }
-            catch (FileNotFoundException)
+
+            if (!orderFound)
             {
-                Console.WriteLine("Transaction history file not found.");
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the transaction history: {e.Message}");
+                Console.WriteLine($"Order ID {orderId} not found in the transaction history.");
             }
         }
 
         public void ViewAllTransactions()
         {
-            try
-            {
-                string[] transactionLines = File.ReadAllLines(TransactionFilePath);
+            string[] transactionLines = File.ReadAllLines(TransactionFilePath);
 
-                if (transactionLines.Length > 0)
+            if (transactionLines.Length > 0)
+            {
+                Console.WriteLine("Transaction History:");
+                foreach (string line in transactionLines)
                 {
-                    Console.WriteLine("Transaction History:");
-                    foreach (string line in transactionLines)
-                    {
-                        Console.WriteLine(line);
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Transaction history is empty.");
+                    Console.WriteLine(line);
                 }
             }
-            catch (FileNotFoundException)
+            else
             {
-                Console.WriteLine("Transaction history file not found.");
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the transaction history: {e.Message}");
+                Console.WriteLine("Transaction history is empty.");
             }
         }
     }
