@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 
 namespace midterm_project
 {
@@ -7,24 +8,17 @@ namespace midterm_project
     {
         public void view()
         {
-            Console.WriteLine("ItemID\tItemName\tPrice\tQuantity");
+            Console.WriteLine("ItemID\tItemName\t\t\tPrice\tQuantity");
 
-            try
+            string filePath = "inventory.csv";
+            string[] lines = File.ReadAllLines(filePath).Skip(1).ToArray();
+
+            foreach (string line in lines)
             {
-                string filePath = "inventory.csv";
-                string[] lines = File.ReadAllLines(filePath);
+                string[] fields = line.Split(',');
 
-                foreach (string line in lines)
-                {
-                    string[] fields = line.Split(',');
-
-                    // Assuming your CSV file has columns in the order of ItemID, ItemName, Quantity, and Price
-                    Console.WriteLine($"{fields[0]}\t{fields[1]}\t{fields[2]}\t{fields[3]}");
-                }
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the file: {e.Message}");
+                string formattedLine = $"{fields[0]}\t{fields[1].PadRight(25)}\t{fields[2]}\t{fields[3]}";
+                Console.WriteLine(formattedLine);
             }
         }
     }
