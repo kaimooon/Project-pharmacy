@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 
 namespace midterm_project
 {
@@ -10,35 +11,27 @@ namespace midterm_project
 
         public void SearchProductInInventory(string partialProductName)
         {
-            try
+            Console.Clear();
+            string[] inventoryLines = File.ReadAllLines(InventoryFilePath).Skip(1).ToArray();
+
+            Console.WriteLine("ItemID\tItemName\t\t\tPrice\tQuantity");
+
+            bool productFound = false;
+
+            foreach (string line in inventoryLines)
             {
-                string[] inventoryLines = File.ReadAllLines(InventoryFilePath);
+                string[] fields = line.Split(',');
 
-                bool productFound = false;
-
-                foreach (string line in inventoryLines)
+                if (fields.Length >= 4 && fields[1].ToLower().Contains(partialProductName.ToLower()))
                 {
-                    string[] fields = line.Split(',');
-
-                    if (fields.Length >= 4 && fields[1].ToLower().Contains(partialProductName.ToLower()))
-                    {
-                        Console.WriteLine($"Product found in inventory: {line}");
-                        productFound = true;
-                    }
-                }
-
-                if (!productFound)
-                {
-                    Console.WriteLine($"No products found in the inventory matching the search criteria: '{partialProductName}'.");
+                    Console.WriteLine($"{fields[0]}\t{fields[1].PadRight(25)}\t{fields[2]}\t{fields[3]}");
+                    productFound = true;
                 }
             }
-            catch (FileNotFoundException)
+
+            if (!productFound)
             {
-                Console.WriteLine("Inventory file not found.");
-            }
-            catch (IOException e)
-            {
-                Console.WriteLine($"An error occurred while reading the inventory: {e.Message}");
+                Console.WriteLine($"No products found in the inventory matching the search criteria: '{partialProductName}'.");
             }
         }
     }
