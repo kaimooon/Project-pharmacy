@@ -1,0 +1,23 @@
+id,name,price,stock
+1,paracetamol,P10,495
+2,loperamide,P20,300
+3,cetrizine,P15,400
+4,omeprazole,P25,250
+5,ibuprofen,P18,340
+6,ascorbic acid,P12,600
+7,diphenhydramine,P30,200
+8,ranitidine,P22,300
+9,simethicone,P28,250
+10,salbutamol inhaler,P150,150
+11,loratadine,P17,400
+12,metformin,P35,200
+13,cefalexin,P40,150
+14,hydrocortisone cream,P45,180
+15,atorvastatin,P50,180
+16,clotrimazole,P20,300
+17,folic acid,P8,500
+18,bisacodyl,P25,250
+19,calcium carbonate,P18,400
+20,acyclovir,P55,120
+21,montelukast,P75,135
+22,clonazepam,P125,60
