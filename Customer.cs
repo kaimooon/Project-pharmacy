@@ -27,46 +27,7 @@ namespace midterm_project
             }
             else if (user_Input == "B")
             {
-                Console.WriteLine("Welcome Customer");
-
-                Inventory inventory = new Inventory();
-                inventory.view(); // Show available items
-
-                Console.Write("Enter the ItemID you want to purchase: ");
-                int itemId;
-                while (!int.TryParse(Console.ReadLine(), out itemId))
-                {
-                    Console.WriteLine("Invalid ItemID. Please enter a valid ItemID: ");
-                }
-
-                Console.Write("Enter the quantity you want to purchase: ");
-                int quantity;
-                while (!int.TryParse(Console.ReadLine(), out quantity) || quantity <= 0)
-                {
-                    Console.WriteLine("Invalid quantity. Please enter a valid quantity: ");
-                }
-
-                string selectedProduct = GetProductNameById(itemId); // Retrieve product name from ItemID
-                double totalPrice = CalculateTotalPrice(selectedProduct, quantity); // Calculate total price
-
-                Console.WriteLine($"Selected Product: {selectedProduct}");
-                Console.WriteLine($"Quantity: {quantity}");
-                Console.WriteLine($"Total Price: {totalPrice}");
-
-                Console.Write("Confirm purchase? (Y/N): ");
-                string confirmation = Console.ReadLine()?.ToUpper();
-
-                if (confirmation == "Y")
-                {
-                    TransactionHistory transactionHistory = new TransactionHistory();
-                    transactionHistory.RecordTransaction(selectedProduct, quantity, totalPrice);
-                    UpdateInventoryAfterPurchase(itemId, quantity); // Update inventory after purchase
-                    Console.WriteLine("Purchase successful!");
-                }
-                else
-                {
-                    Console.WriteLine("Purchase canceled.");
-                }
+                BuyProduct();
             }
             else if (user_Input == "S")
             {
@@ -80,6 +41,50 @@ namespace midterm_project
             {
                 Console.WriteLine("Bye");
                 Console.ReadKey();
+            }
+        }
+
+        private void BuyProduct()
+        {
+            Console.WriteLine("Welcome Customer");
+
+            Inventory inventory = new Inventory();
+            inventory.view(); // Show available items
+
+            Console.Write("Enter the ItemID you want to purchase: ");
+            int itemId;
+            while (!int.TryParse(Console.ReadLine(), out itemId))
+            {
+                Console.WriteLine("Invalid ItemID. Please enter a valid ItemID: ");
+            }
+
+            Console.Write("Enter the quantity you want to purchase: ");
+            int quantity;
+            while (!int.TryParse(Console.ReadLine(), out quantity) || quantity <= 0)
+            {
+                Console.WriteLine("Invalid quantity. Please enter a valid quantity: ");
+            }
+
+            string selectedProduct = GetProductNameById(itemId); // Retrieve product name from ItemID
+            double totalPrice = CalculateTotalPrice(selectedProduct, quantity); // Calculate total price
+
+            Console.WriteLine($"Selected Product: {selectedProduct}");
+            Console.WriteLine($"Quantity: {quantity}");
+            Console.WriteLine($"Total Price: {totalPrice}");
+
+            Console.Write("Confirm purchase? (Y/N): ");
+            string confirmation = Console.ReadLine()?.ToUpper();
+
+            if (confirmation == "Y")
+            {
+                TransactionHistory transactionHistory = new TransactionHistory();
+                transactionHistory.RecordTransaction(selectedProduct, quantity, totalPrice);
+                UpdateInventoryAfterPurchase(itemId, quantity); // Update inventory after purchase
+                Console.WriteLine("Purchase successful!");
+            }
+            else
+            {
+                Console.WriteLine("Purchase canceled.");
             }
         }
 
